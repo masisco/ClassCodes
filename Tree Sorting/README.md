@@ -1,5 +1,6 @@
 # Tree Sorting
 
+Main method in Driver.java
 
 ## Mari Sisco, in collaboration with Emma Smith and Aidan Shaughnessy
 
