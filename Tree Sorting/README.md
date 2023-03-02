@@ -1,43 +1,9 @@
-# nuts
+# Tree Sorting
 
 ```
 grading
 
 OOP 91/100
-
-why didn't you use a shared repo?
-
-points
-     git repo include derived files -- don't commit derived (class) files to a repo
-     git log -- for a project of this complexity, i'd expect more commits from all involved!
-     file headers -- missing on CLI.java
-     method headers
-     non protected/private attributes
-     magic numbers
-     tree or node declaration (e.g., should be generic)
-   1 empirical data analysis  -- O(n) is impossible :) ... check N lg N :)
-     compiles  -- error: file not found: Driver.java
-     compiles clean (-Xlint) / unchecked / "@suppressWarnings"
-   2 CLI test
-     "simple" runs
-     point test via API
-     stress test via API
-
-     oo violation / get/set
-   2 fmt -- indent / page breaks
-   4 src
-     -- perhaps this might be local to the constructor  protected List<E> list = new LinkedList<E>();
-     -- favor Deque: Queue<Node> queue = new LinkedList<Node>();
-     -- after the loop "while (queue.size() > 1)", "if(queue.size() == 1)"  has to be true
-     -- i do not grok 'atRoot'.  it is only ever called with the root node??
-        - is this the actual sort?
-     naming  e.g., "boolean flag" ... really?
-     moodle presentation
-   0 excessive code clones
-   0 compareTo() assumes return +/-1
-   0 implemented BST
-```
-
 
 
 ## Mari Sisco, in collaboration with Emma Smith and Aidan Shaughnessy
