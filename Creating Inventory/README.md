@@ -1,77 +1,13 @@
 # CS 312 Assignment 3
-# stuff
+# Creating Inventory
 
 
 ```
-OOP 93/100   -- nice!!
-
-Assignment 4 grading
-    mycode.pdf
-    git log
-    derived files in repo
-    file headers
-    method headers
-    protected attributes only
-    declaration: Deque<Item> inventory = ... vs ArrayDeque<Item> inventory =
-    static methods
-    use of super() / missing constructors
-    existence of add(DVD, add(CD, add(AB, add(BOOK ... rather than add(Stuff
-    s1 == s2 rather than s1.equals(s2)
-    abstract method use -- isAuthor abstract in Item, false in Disk,
-                                    .equals(needle) in Book
-    serialize missing
-    test cases in readme -- better to include testfile to make the test self contained
-    javac *.java
-  4 run with (2 points each)
-      cat ../testfile | java CLI -d
-      cat ../testfile | java CLI -d -t
-      cat ../testfile | java CLI -d -t 'Star Trek'
-      cat ../testfile | java CLI -d -a 'Asimov'
-    2 cat ../testfile | java CLI -a BOOK 'Star Trek' 1.99 Bill SCIFI USED
-      -- Exception in thread "main" java.lang.NullPointerException
-    2 cat ../testfile | java CLI -a BOOK 'Star Trek' 1.99 Bill SCIFI USED
-        | java CLI -d -t 'Star Trek'
-      -- Exception in thread "main" java.lang.NullPointerException
-      cat ../testfile | java CLI -s -t 'Star Trek'
-
-    OO violation       -- did you know?
-  1 organization
-    -- while "Deque<Item> copyStuff = new ArrayDeque<Item>(stuff);" is O(n) it is still expensive
-    O(n^2)
-    format (fmt) ... 2up pdf, code looks pretty, etc.
-  2 indent
-     -- check the pdf
-    naming
-
-```
-
-
-
-
-
-
-OOD - good first go, note that initializeation (constructors) belong in the OOD
-
-
+OOP grade:
 93/100
 
-points
- 5 uml diagram -- missing
-   missing classes
-   missing attributes
-   missing services
-   inheritance (is-a) makes no sense
-   delegation (has-a) makes no sense
-
-   sometime applicable attributes / services
-   repeated attributes in all subclasses
-   fails to use client's terminology
- 2 includes solution domain vocabulary
-   -- ArrayList, toString etc. are geek speak and thus do not belong in the OOA
-
-
-
-[Assignment ](https://moodle.loyola.edu/mod/resource/view.php?id=3450022)
+OOD grade:
+93/100
 
 
 # OOA1
