@@ -1,6 +1,5 @@
 # Polynomial, Adding + Subtracting
 
-```
 grading
 
 OOP 83/100
