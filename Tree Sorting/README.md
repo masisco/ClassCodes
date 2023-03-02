@@ -1,23 +1,13 @@
 # Tree Sorting
 
-```
-grading
-
-OOP 91/100
-
 
 ## Mari Sisco, in collaboration with Emma Smith and Aidan Shaughnessy
 
-
-## video link for sorting-out-sorting (tree sort runs from about 17:45 to 20:30)
-
-https://www.youtube.com/watch?v=SJwEwA5gOkM
 
 ## One Paragraph Requirements Summary
 
 For this assignment, I am requiered to understand the concept of building trees from the leaves to the top in order to sort a list of objects. The list should accept generic data values, however the command line interface should focus on sorting integers. Class Tree is needed, containing a linkedlist attribute of objects to be sorted. A nested Node class is inside of tree class. Driver class, aka CLI, is also needed.
 
-## OOA UML class diagram PDF: UML-nuts-masisco.pdf
 
 ## OOA1
 
