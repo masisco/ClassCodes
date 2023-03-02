@@ -2,9 +2,7 @@
 
 
 ```
-Grade 84/100 -8 late 1 --> 76
-
-LATE 1 ... i'll split the two day with you ;-)
+Grade 84/100 
 
      OOA.pdf, OOD.pdf, and mycode.pdf
      use case diagram
