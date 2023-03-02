@@ -1,5 +1,7 @@
 # Polynomial, Adding + Subtracting
 
+Main method in Tester.java
+
 ## OOA
 
 ## OOA1
