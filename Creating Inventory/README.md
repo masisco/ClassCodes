@@ -1,15 +1,6 @@
 # CS 312 Assignment 3
 # Creating Inventory
 
-
-```
-OOP grade:
-93/100
-
-OOD grade:
-93/100
-
-
 # OOA1
 ### Finding Classes and Objects
 
