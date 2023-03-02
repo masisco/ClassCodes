@@ -1,44 +1,9 @@
-# poly want a nomial
+# Polynomial, Adding + Subtracting
 
 ```
 grading
 
 OOP 83/100
-
-   UML diagram in UML-class-diagram.pdf
-   mycode.pdf
-   git use
-   git holds derived files (e.g. .class files) in repo
-   get/set usage
-   file headers
-   method headers
-   non protected / private atts
- 3 compareTo() - don't assume it returns +/-1
- 2 iterator use - foreach where appropriate, hasNext otherwise
-   -- multiple needs only used the foreach iterators
- 2 proper generics use -- Deque<Term>...
-   compile
-   Tester work
-   API tests work
-
- 5 oo violation - did you know?
-   because we use no subclasses you should be able to replace 'protected' with
-   'private'.  try it! then ponder how you might you fix each oops!
-   -- if( t1.exponent.compareTo(t2.exponent) == 0)
-   -- Term (t1.coefficient + t2.coefficient, t1.exponent);
-   -- new Term(t1.coefficient + t2.coefficient, t1.exponent));
- 3 O(n^2) add
- 2 rebreak - e.g., function spread over two pages
-   fmt
-   naming
-   code/org
-
-   empirical data analysis in README
-
- 0  multiple(poly) should delegate to multiply(term)
- 0  @Override with compareTo()
-
-```
 
 
 You can used either the hard coded tester of the JUnit tester ... or both :)
