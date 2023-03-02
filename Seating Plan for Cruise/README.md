@@ -1,39 +1,6 @@
+# Cruise Seating Plan
 
-
-```Grade 94/100 -- nice!!
-
-points
-   2 UML diagram
-     -- Table has-a Group ... Class Table { protected Deque<Person> occupants; ...
-     plateau schedule in README
-     2up pdf of code
-     git repo derived file check
-     git log
-     file headers
-     oo violation / get/set
-     non protected/private attributes
-     correct use of .equals (e.g., rather than == )
-     appropriate iterator use (e.g., not using "get(i)" favoring the foreach version)
-     Deque use
-     use of general type in declaration (e.e., List<..> people....)
-
-     compiles (one point per error, max 10)
-     my tester
-
-     place group incomplete or wrong order
-     format
-   4 rebreak -- awkward line or page break
-     src
-
-   0 code clones
-   0 first class booleans
-   0 division by zero check
-
-```
-
-
-
-# cruise-masisco
+Main Method in tester.java
 
 # Plateau Schedule
 
