@@ -1,12 +1,5 @@
 # Polynomial, Adding + Subtracting
 
-grading
-
-OOP 83/100
-
-
-You can used either the hard coded tester of the JUnit tester ... or both :)
-
 ## OOA
 
 ## OOA1
