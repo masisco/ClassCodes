@@ -1,0 +1,2457 @@
+%!PS-Adobe-3.0
+%%Title: Item.java, Disk.java, Book.java, CD.java, DVD.java, PrintBook.java, AudioBook.java, Inventory.java, CLI.java, ItemFactory.java
+%%For: Mari Sisco
+%%Creator: a2ps version 4.14
+%%CreationDate: Wed Oct 19 19:27:28 2022
+%%BoundingBox: 24 24 588 768
+%%DocumentData: Clean7Bit
+%%Orientation: Landscape
+%%Pages: 8
+%%PageOrder: Ascend
+%%DocumentMedia: Letter 612 792 0 () ()
+%%DocumentNeededResources: font Courier
+%%+ font Courier-Bold
+%%+ font Courier-BoldOblique
+%%+ font Courier-Oblique
+%%+ font Helvetica
+%%+ font Helvetica-Bold
+%%+ font Symbol
+%%+ font Times-Bold
+%%+ font Times-Roman
+%%DocumentProcessColors: Black 
+%%DocumentSuppliedResources: procset a2ps-a2ps-hdr
+%%+ procset a2ps-black+white-Prolog
+%%+ encoding ISO-8859-1Encoding
+%%EndComments
+/a2psdict 200 dict def
+a2psdict begin
+%%BeginProlog
+%%Copyright: (c) 1988, 89, 90, 91, 92, 93 Miguel Santana
+%%Copyright: (c) 1995, 96, 97, 98 Akim Demaille, Miguel Santana
+% Check PostScript language level.
+/languagelevel where {
+  pop /gs_languagelevel languagelevel def
+} {
+  /gs_languagelevel 1 def
+} ifelse
+
+% EPSF import as in the Red Book
+/BeginInclude {
+  /b4_Inc_state save def    		% Save state for cleanup
+  /dict_count countdictstack def	% Count objects on dict stack
+  /op_count count 1 sub def		% Count objects on operand stack 
+  userdict begin
+    0 setgray 0 setlinecap
+    1 setlinewidth 0 setlinejoin
+    10 setmiterlimit [ ] 0 setdash newpath
+    gs_languagelevel 1 ne {
+      false setstrokeadjust false setoverprint 
+    } if
+} bind def
+
+/EndInclude {
+  count op_count sub { pos } repeat	% Clean up stacks
+  countdictstack dict_count sub { end } repeat
+  b4_Inc_state restore
+} bind def
+
+/BeginEPSF {
+  BeginInclude
+  /showpage { } def
+} bind def
+
+/EndEPSF {
+  EndInclude
+} bind def
+
+% Page prefeed
+/page_prefeed {         % bool -> -
+  statusdict /prefeed known {
+    statusdict exch /prefeed exch put
+  } {
+    pop
+  } ifelse
+} bind def
+
+/deffont {
+  findfont exch scalefont def
+} bind def
+
+/reencode_font {
+  findfont reencode 2 copy definefont pop def
+} bind def
+
+% Function c-show (str => -)
+% centers text only according to x axis.
+/c-show { 
+  dup stringwidth pop
+  2 div neg 0 rmoveto
+  show
+} bind def
+
+% Function l-show (str => -)
+% prints texts so that it ends at currentpoint
+/l-show {
+  dup stringwidth pop neg 
+  0 
+  rmoveto show
+} bind def
+
+% center-fit show (str w => -)
+% show centered, and scale currentfont so that the width is less than w
+/cfshow {
+  exch dup stringwidth pop
+  % If the title is too big, try to make it smaller
+  3 2 roll 2 copy
+  gt
+  { % if, i.e. too big
+    exch div
+    currentfont exch scalefont setfont
+  } { % ifelse
+    pop pop 
+  }
+  ifelse
+  c-show			% center title
+} bind def
+
+% Return the y size of the current font
+% - => fontsize
+/currentfontsize {
+  currentfont /FontType get 0 eq {
+    currentfont /FontMatrix get 3 get
+  }{
+    currentfont /FontMatrix get 3 get 1000 mul
+  } ifelse
+} bind def
+
+% reencode the font
+% <encoding-vector> <fontdict> -> <newfontdict>
+/reencode { %def
+  dup length 5 add dict begin
+    { %forall
+      % <vector> <key> <val>
+      1 index /FID ne 
+      { def }{ pop pop } ifelse
+    } forall
+    /Encoding exch def % -
+
+    % Use the font's bounding box to determine the ascent, descent,
+    % and overall height; don't forget that these values have to be
+    % transformed using the font's matrix.
+    % We use `load' because sometimes BBox is executable, sometimes not.
+    % Since we need 4 numbers an not an array avoid BBox from being executed
+    /FontBBox load aload pop
+    FontMatrix transform /Ascent exch def pop
+    FontMatrix transform /Descent exch def pop
+    /FontHeight Ascent Descent sub def
+
+    % Get the underline position and thickness if they're defined.
+    % Use 1 if they are not defined.
+    currentdict /FontInfo 2 copy known
+    { get
+      /UnderlinePosition 2 copy % <FontInfo> /UP <FontInfo> /UP
+      2 copy known
+      { get }{ pop pop 1 } ifelse
+      0 exch FontMatrix transform exch pop
+      def % <FontInfo>
+
+      /UnderlineThickness 2 copy % <FontInfo> /UT <FontInfo> /UT
+      2 copy known
+      { get }{ pop pop 1 } ifelse
+      0 exch FontMatrix transform exch pop
+      def % <FontInfo>
+      pop % -
+    }{ pop pop
+    } ifelse
+
+    currentdict
+  end 
+} bind def
+
+% composite fonts for ASCII-EUC mixed strings
+% Version 1.2 1/31/1990
+% Original Ken'ichi HANDA (handa@etl.go.jp)
+% Modified Norio Katayama (katayama@rd.nacsis.ac.jp),1998
+% Extend & Fix Koji Nakamaru (maru@on.cs.keio.ac.jp), 1999
+% Anyone can freely copy, modify, distribute this program.
+
+/copyfont {	% font-dic extra-entry-count  copyfont  font-dic
+	1 index maxlength add dict begin
+	{	1 index /FID ne 2 index /UniqueID ne and
+		{def} {pop pop} ifelse
+	} forall
+	currentdict
+	end
+} bind def
+
+/compositefont { % ASCIIFontName EUCFontName RomanScale RomanOffset Rot(T/F) compositefont font
+    /RomanRotation exch def
+    /RomanOffset exch def
+    /RomanScale exch def
+    userdict /fixeucfont_dict known not {
+	userdict begin
+	    /fixeucfont_dict 2 dict begin
+		/UpperByteEncoding [
+		    16#00 1 16#20 { pop 0 } for
+		    16#21 1 16#28 { 16#20 sub } for
+		    16#29 1 16#2F { pop 0 } for
+		    16#30 1 16#74 { 16#27 sub } for
+		    16#75 1 16#FF { pop 0 } for
+		] def
+	        /LowerByteEncoding [
+		    16#00 1 16#A0 { pop /.notdef } for
+		    16#A1 1 16#FE { 16#80 sub 16 2 string cvrs
+				    (cXX) dup 1 4 -1 roll
+				    putinterval cvn } for
+		    /.notdef
+		] def
+		currentdict
+	    end def
+	end
+    } if
+    findfont dup /FontType get 0 eq {
+	14 dict begin
+	    %
+	    % 7+8 bit EUC font
+	    %
+	    12 dict begin
+		/EUCFont exch def
+		/FontInfo (7+8 bit EUC font) readonly def
+		/PaintType 0 def
+		/FontType 0 def
+		/FontMatrix matrix def
+		% /FontName
+		/Encoding fixeucfont_dict /UpperByteEncoding get def
+		/FMapType 2 def
+		EUCFont /WMode known
+		{ EUCFont /WMode get /WMode exch def }
+		{ /WMode 0 def } ifelse
+		/FDepVector [
+		    EUCFont /FDepVector get 0 get
+		    [ 16#21 1 16#28 {} for 16#30 1 16#74 {} for ]
+		    {
+			13 dict begin
+			    /EUCFont EUCFont def
+			    /UpperByte exch 16#80 add def	
+			    % /FontName
+			    /FontInfo (EUC lower byte font) readonly def
+			    /PaintType 0 def
+			    /FontType 3 def
+			    /FontMatrix matrix def
+			    /FontBBox {0 0 0 0} def
+			    /Encoding
+				fixeucfont_dict /LowerByteEncoding get def
+			    % /UniqueID
+			    % /WMode
+			    /BuildChar {
+				gsave
+				exch dup /EUCFont get setfont
+				/UpperByte get
+				2 string
+				dup 0 4 -1 roll put
+				dup 1 4 -1 roll put
+				dup stringwidth setcharwidth
+				0 0 moveto show
+				grestore
+			    } bind def
+			    currentdict
+			end
+			/lowerbytefont exch definefont
+		    } forall
+		] def
+		currentdict
+	    end
+	    /eucfont exch definefont
+	    exch
+	    findfont 1 copyfont dup begin
+		RomanRotation {
+			/FontMatrix FontMatrix
+			[ 0 RomanScale neg RomanScale 0 RomanOffset neg 0 ]
+			matrix concatmatrix def
+		}{
+			/FontMatrix FontMatrix
+			[ RomanScale 0 0 RomanScale 0 RomanOffset ] matrix concatmatrix
+			def
+			/CDevProc
+			    {pop pop pop pop 0 exch -1000 exch 2 div 880} def
+		} ifelse
+	    end
+	    /asciifont exch definefont
+	    exch
+	    /FDepVector [ 4 2 roll ] def
+	    /FontType 0 def
+	    /WMode 0 def
+	    /FMapType 4 def
+	    /FontMatrix matrix def
+	    /Encoding [0 1] def
+	    /FontBBox {0 0 0 0} def
+%	    /FontHeight 1.0 def % XXXX
+	    /FontHeight RomanScale 1.0 ge { RomanScale }{ 1.0 } ifelse def
+	    /Descent -0.3 def   % XXXX
+	    currentdict
+	end
+	/tmpfont exch definefont
+	pop
+	/tmpfont findfont
+    }{
+	pop findfont 0 copyfont
+    } ifelse
+} def	
+
+/slantfont {	% FontName slant-degree  slantfont  font'
+    exch findfont 1 copyfont begin
+    [ 1 0 4 -1 roll 1 0 0 ] FontMatrix exch matrix concatmatrix
+    /FontMatrix exch def
+    currentdict
+    end
+} def
+
+% Function print line number (<string> # -)
+/# {
+  gsave
+    sx cw mul neg 2 div 0 rmoveto
+    f# setfont
+    c-show
+  grestore
+} bind def
+
+% -------- Some routines to enlight plain b/w printings ---------
+
+% Underline
+% width --
+/dounderline {
+  currentpoint
+  gsave
+    moveto
+    0 currentfont /Descent get currentfontsize mul rmoveto
+    0 rlineto
+    stroke
+  grestore
+} bind def
+
+% Underline a string
+% string --
+/dounderlinestring {
+  stringwidth pop
+  dounderline
+} bind def
+
+/UL {
+  /ul exch store
+} bind def
+
+% Draw a box of WIDTH wrt current font
+% width --
+/dobox {
+  currentpoint
+  gsave
+    newpath
+    moveto
+    0 currentfont /Descent get currentfontsize mul rmoveto
+    dup 0 rlineto
+    0 currentfont /FontHeight get currentfontsize mul rlineto
+    neg 0 rlineto
+    closepath
+    stroke
+  grestore
+} bind def
+
+/BX {
+  /bx exch store
+} bind def
+
+% Box a string
+% string --
+/doboxstring {
+  stringwidth pop
+  dobox
+} bind def
+
+%
+% ------------- Color routines ---------------
+%
+/FG /setrgbcolor load def
+
+% Draw the background
+% width --
+/dobackground {
+  currentpoint
+  gsave
+    newpath
+    moveto
+    0 currentfont /Descent get currentfontsize mul rmoveto
+    dup 0 rlineto
+    0 currentfont /FontHeight get currentfontsize mul rlineto
+    neg 0 rlineto
+    closepath
+    bgcolor aload pop setrgbcolor
+    fill
+  grestore
+} bind def
+
+% Draw bg for a string
+% string --
+/dobackgroundstring {
+  stringwidth pop
+  dobackground
+} bind def
+
+
+/BG {
+  dup /bg exch store
+  { mark 4 1 roll ] /bgcolor exch store } if
+} bind def
+
+
+/Show {
+  bg { dup dobackgroundstring } if
+  ul { dup dounderlinestring } if
+  bx { dup doboxstring } if
+  show
+} bind def
+
+% Function T(ab), jumps to the n-th tabulation in the current line
+/T {
+  cw mul x0 add
+  bg { dup currentpoint pop sub dobackground } if
+  ul { dup currentpoint pop sub dounderline } if
+  bx { dup currentpoint pop sub dobox } if
+  y0 moveto
+} bind def
+
+% Function n: move to the next line
+/n {
+  /y0 y0 bfs sub store
+  x0 y0 moveto
+} bind def
+
+% Function N: show and move to the next line
+/N {
+  Show
+  /y0 y0 bfs sub store
+  x0 y0 moveto
+} bind def
+
+/S {
+  Show
+} bind def
+
+%%BeginResource: procset a2ps-a2ps-hdr 2.0 2
+%%Copyright: (c) 1988, 89, 90, 91, 92, 93 Miguel Santana
+%%Copyright: (c) 1995, 96, 97, 98 Akim Demaille, Miguel Santana
+% Function title: prints page header.
+% <ct> <rt> <lt> are passed as argument
+/title { 
+  % 1. Draw the background
+  x v get y v get moveto
+  gsave
+    0 th 2 div neg rmoveto 
+    th setlinewidth
+    0.95 setgray
+    pw 0 rlineto stroke
+  grestore
+  % 2. Border it
+  gsave
+    0.7 setlinewidth
+    pw 0 rlineto
+    0 th neg rlineto
+    pw neg 0 rlineto
+    closepath stroke
+  grestore
+  % stk: ct rt lt
+  x v get y v get th sub 1 add moveto
+%%IncludeResource: font Helvetica
+  fHelvetica fnfs 0.8 mul scalefont setfont
+  % 3. The left title
+  gsave
+    dup stringwidth pop fnfs 0.8 mul add exch % leave space took on stack
+    fnfs 0.8 mul hm rmoveto
+    show			% left title
+  grestore
+  exch
+  % stk: ct ltw rt
+  % 4. the right title
+  gsave
+    dup stringwidth pop fnfs 0.8 mul add exch % leave space took on stack
+    dup
+    pw exch stringwidth pop fnfs 0.8 mul add sub
+    hm
+    rmoveto
+    show			% right title
+  grestore
+  % stk: ct ltw rtw
+  % 5. the center title
+  gsave
+    pw 3 1 roll
+    % stk: ct pw ltw rtw
+    3 copy 
+    % Move to the center of the left room
+    sub add 2 div hm rmoveto
+    % What is the available space in here?
+    add sub fnfs 0.8 mul sub fnfs 0.8 mul sub
+    % stk: ct space_left
+%%IncludeResource: font Helvetica-Bold
+  fHelvetica-Bold fnfs scalefont setfont
+    cfshow
+  grestore
+} bind def
+
+% Function border: prints virtual page border
+/border { %def
+  gsave				% print four sides
+    0 setgray
+    x v get y v get moveto
+    0.7 setlinewidth		% of the square
+    pw 0 rlineto
+    0 ph neg rlineto
+    pw neg 0 rlineto
+    closepath stroke
+  grestore
+} bind def
+
+% Function water: prints a water mark in background
+/water { %def
+  gsave
+    scx scy moveto rotate
+%%IncludeResource: font Times-Bold
+  fTimes-Bold 100 scalefont setfont
+    .97 setgray
+    dup stringwidth pop 2 div neg -50 rmoveto
+    show
+  grestore
+} bind def
+
+% Function rhead: prints the right header
+/rhead {  %def
+  lx ly moveto
+  fHelvetica fnfs 0.8 mul scalefont setfont
+  l-show
+} bind def
+
+% Function footer (cf rf lf -> -)
+/footer {
+  fHelvetica fnfs 0.8 mul scalefont setfont
+  dx dy moveto
+  show
+
+  snx sny moveto
+  l-show
+  
+  fnx fny moveto
+  c-show
+} bind def
+%%EndResource
+%%BeginResource: procset a2ps-black+white-Prolog 2.0 1
+
+% Function T(ab), jumps to the n-th tabulation in the current line
+/T { 
+  cw mul x0 add y0 moveto
+} bind def
+
+% Function n: move to the next line
+/n { %def
+  /y0 y0 bfs sub store
+  x0 y0 moveto
+} bind def
+
+% Function N: show and move to the next line
+/N {
+  Show
+  /y0 y0 bfs sub store
+  x0 y0 moveto
+}  bind def
+
+/S {
+  Show
+} bind def
+
+/p {
+  false UL
+  false BX
+  fCourier bfs scalefont setfont
+  Show
+} bind def
+
+/sy {
+  false UL
+  false BX
+  fSymbol bfs scalefont setfont
+  Show
+} bind def
+
+/k {
+  false UL
+  false BX
+  fCourier-Oblique bfs scalefont setfont
+  Show
+} bind def
+
+/K {
+  false UL
+  false BX
+  fCourier-Bold bfs scalefont setfont
+  Show
+} bind def
+
+/c {
+  false UL
+  false BX
+  fCourier-Oblique bfs scalefont setfont
+  Show
+} bind def
+
+/C {
+  false UL
+  false BX
+  fCourier-BoldOblique bfs scalefont setfont
+  Show 
+} bind def
+
+/l {
+  false UL
+  false BX
+  fHelvetica bfs scalefont setfont
+  Show
+} bind def
+
+/L {
+  false UL
+  false BX
+  fHelvetica-Bold bfs scalefont setfont
+  Show 
+} bind def
+
+/str{
+  false UL
+  false BX
+  fTimes-Roman bfs scalefont setfont
+  Show
+} bind def
+
+/e{
+  false UL
+  true BX
+  fHelvetica-Bold bfs scalefont setfont
+  Show
+} bind def
+
+%%EndResource
+%%EndProlog
+%%BeginSetup
+%%IncludeResource: font Courier
+%%IncludeResource: font Courier-Oblique
+%%IncludeResource: font Courier-Bold
+%%IncludeResource: font Times-Roman
+%%IncludeResource: font Symbol
+%%IncludeResource: font Courier-BoldOblique
+%%BeginResource: encoding ISO-8859-1Encoding
+/ISO-8859-1Encoding [
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/space /exclam /quotedbl /numbersign /dollar /percent /ampersand /quoteright 
+/parenleft /parenright /asterisk /plus /comma /minus /period /slash 
+/zero /one /two /three /four /five /six /seven 
+/eight /nine /colon /semicolon /less /equal /greater /question 
+/at /A /B /C /D /E /F /G 
+/H /I /J /K /L /M /N /O 
+/P /Q /R /S /T /U /V /W 
+/X /Y /Z /bracketleft /backslash /bracketright /asciicircum /underscore 
+/quoteleft /a /b /c /d /e /f /g 
+/h /i /j /k /l /m /n /o 
+/p /q /r /s /t /u /v /w 
+/x /y /z /braceleft /bar /braceright /asciitilde /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/space /exclamdown /cent /sterling /currency /yen /brokenbar /section 
+/dieresis /copyright /ordfeminine /guillemotleft /logicalnot /hyphen /registered /macron 
+/degree /plusminus /twosuperior /threesuperior /acute /mu /paragraph /bullet 
+/cedilla /onesuperior /ordmasculine /guillemotright /onequarter /onehalf /threequarters /questiondown 
+/Agrave /Aacute /Acircumflex /Atilde /Adieresis /Aring /AE /Ccedilla 
+/Egrave /Eacute /Ecircumflex /Edieresis /Igrave /Iacute /Icircumflex /Idieresis 
+/Eth /Ntilde /Ograve /Oacute /Ocircumflex /Otilde /Odieresis /multiply 
+/Oslash /Ugrave /Uacute /Ucircumflex /Udieresis /Yacute /Thorn /germandbls 
+/agrave /aacute /acircumflex /atilde /adieresis /aring /ae /ccedilla 
+/egrave /eacute /ecircumflex /edieresis /igrave /iacute /icircumflex /idieresis 
+/eth /ntilde /ograve /oacute /ocircumflex /otilde /odieresis /divide 
+/oslash /ugrave /uacute /ucircumflex /udieresis /yacute /thorn /ydieresis 
+] def
+%%EndResource
+% Initialize page description variables.
+/sh 612 def
+/sw 792 def
+/llx 24 def
+/urx 768 def
+/ury 588 def
+/lly 24 def
+/#copies 1 def
+/th 15.000000 def
+/fnfs 11 def
+/bfs 7.493857 def
+/cw 4.496314 def
+
+% Dictionary for ISO-8859-1 support
+/iso1dict 8 dict begin
+  /fCourier ISO-8859-1Encoding /Courier reencode_font
+  /fCourier-Bold ISO-8859-1Encoding /Courier-Bold reencode_font
+  /fCourier-BoldOblique ISO-8859-1Encoding /Courier-BoldOblique reencode_font
+  /fCourier-Oblique ISO-8859-1Encoding /Courier-Oblique reencode_font
+  /fHelvetica ISO-8859-1Encoding /Helvetica reencode_font
+  /fHelvetica-Bold ISO-8859-1Encoding /Helvetica-Bold reencode_font
+  /fTimes-Bold ISO-8859-1Encoding /Times-Bold reencode_font
+  /fTimes-Roman ISO-8859-1Encoding /Times-Roman reencode_font
+currentdict end def
+/bgcolor [ 0 0 0 ] def
+/bg false def
+/ul false def
+/bx false def
+% The font for line numbering
+/f# /Helvetica findfont bfs .6 mul scalefont def
+/fSymbol /Symbol findfont def
+/hm fnfs 0.25 mul def
+/pw
+   cw 81.400000 mul
+def
+/ph
+   522.321860 th add
+def
+/pmw urx llx sub pw 2 mul sub 1 div def
+/pmh 0 def
+/v 0 def
+/x [
+  0
+  dup pmw add pw add
+] def
+/y [
+  pmh ph add 0 mul ph add
+  dup
+] def
+/scx sw 2 div def
+/scy sh 2 div def
+/snx urx def
+/sny lly 2 add def
+/dx llx def
+/dy sny def
+/fnx scx def
+/fny dy def
+/lx snx def
+/ly ury fnfs 0.8 mul sub def
+/sx 0 def
+/tab 4 def
+/x0 0 def
+/y0 0 def
+%%EndSetup
+
+%%Page: (1-2) 1
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.147420 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(/**) C n
+(* This is my code! Its goal is to create an Item object in this abstract class ) N
+(* CS 312 - Assignment 4) N
+(* @author Mari Sisco) N
+(* @version 1.0, 10/19/22) N
+(*/) N
+() p n
+(abstract) K
+( ) p
+(class) K
+( ) p
+(Item) L n
+({) p n
+(    ) S
+(protected) K
+( String title;) p n
+(    ) S
+(protected) K
+( ) p
+(double) k
+( cost;) p n
+(    ) S
+(protected) K
+( ) p
+(boolean) k
+( isNew;) p n
+() N
+(    ) S
+(/*) c n
+(     * purpose: initialize a new item) N
+(     * input:   the item's title,cost, and newness flag, isNew) N
+(     * result:  the item is initialized) N
+(     */) N
+(    ) p
+(public) K
+( Item\(String title, ) p
+(double) k
+( cost, ) p
+(boolean) k
+( isNew\)) p n
+(    {) N
+(        this.title = title;) N
+(        this.cost = cost;) N
+(        this.isNew = isNew;) N
+(    }) N
+(    ) N
+(    ) S
+(/*) c n
+(     * purpose: support lookup by cost) N
+(     * input:   the target cost, needle) N
+(     * result:  true if my cost == needle) N
+(     */) N
+(    ) p
+(public) K
+( ) p
+(boolean) k
+( isMyCost\() p
+(double) k
+( needle\)) p n
+(    {) N
+() S 4 T () S
+(return) K
+( cost == needle;) p n
+(    }) N
+(    ) N
+(    ) S
+(/*) c n
+(     * purpose: support lookup by title) N
+(     * input:   the target title, needle) N
+(     * result:  true if my title == needle) N
+(     */) N
+(    ) p
+(public) K
+( ) p
+(boolean) k
+( isMyTitle\(String needle\)) p n
+(    {) N
+(        ) S
+(return) K
+( title.equals\(needle\);) p n
+(    }) N
+() N
+(    ) S
+(/*) c n
+(     * [ needed for Java's static typing. non-Books return false ]) N
+(     * purpose: determines if a book has a given author) N
+(     * input:   the author, needle) N
+(     * result:  true if needle is my author) N
+(     */) N
+() p n
+(    ) S
+(abstract) K
+( ) p
+(boolean) k
+( isMyAuthor\(String needle\);) p n
+() N
+(    ) S
+(/*) c n
+(     * [ needed for Java's static typing, so that item.serialize\(\) compiles. ]) N
+(     * purpose: serialize an item) N
+(     * input:   only this item) N
+(     * result:  the appropriate semi-colon separated string) N
+(     */) N
+(    ) p
+(abstract) K
+( String serialize\(\);) p n
+() N
+(    ) S
+(/*) c n
+(     * purpose: produce a human-readable string representation of the item ) N
+(     * input:   just the item) N
+(     * result:  the item's string representation) N
+(     */) N
+(    ) p
+(public) K
+( String toString\(\)) p n
+(    {) N
+(Item.java) (Page 1/2) (Oct 19, 22 19:22) title
+border
+/v 1 store
+/x0 x v get 3.147420 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(        String state = ") p
+(USED) str
+(";) p n
+() S 4 T () S
+(if) K
+( \(isNew\)) p n
+() S 4 T (  state = ") S
+(NEW) str
+(";) p n
+() S 4 T (  ) N
+(        ) S
+(return) K
+( ") p
+(Title = ) str
+(" + title + ") p
+(\\nCost = $) str
+(" + cost + ") p
+(\\nCondition = ) str
+(" + state;) p n
+(    }) N
+(}) N
+(Item.java) (Page 2/2) (Oct 19, 22 19:22) title
+border
+grestore
+(Printed by Mari Sisco) rhead
+(Item.java) (1/8) (Wednesday October 19, 2022) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (1,1) 2
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.147420 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(/**) C n
+(* This is my code! Its goal is to create a Disk object, store its info and imple) N
+(ment some useful methods; it extends Item) N
+(* CS 312 - Assignment 4) N
+(* @author Mari Sisco) N
+(* @version 1.0, 10/19/2022) N
+(*/) N
+() p n
+(abstract) K
+( ) p
+(class) K
+( ) p
+(Disk) L
+( ) p
+(extends) K
+( Item) p n
+({) N
+(    ) S
+(protected) K
+( ) p
+(int) k
+( releaseYear;) p n
+() N
+(    ) S
+(/*) c n
+(     * purpose: initialize a new disk) N
+(     * input:   the disk's title, cost, newness flag \(isNew\), and year released) N
+(     * output:  the initialized Disk) N
+(     */) N
+(    ) p
+(public) K
+( Disk\(String title, ) p
+(double) k
+( cost, ) p
+(boolean) k
+( isNew, ) p
+(int) k
+( released\) ) p n
+(    {) N
+(        ) S
+(super) K
+(\(title, cost, isNew\);) p n
+(        releaseYear = released;) N
+(    }) N
+() N
+(    ) S
+(/*) c n
+(     * purpose: determine if a book has a given auhor) N
+(     * input:   the author, needle) N
+(     * output:  false, as I am not a book!) N
+(     */) N
+(    @Override) p n
+(    ) S
+(public) K
+( ) p
+(boolean) k
+( isMyAuthor\(String needle\)) p n
+(    {) N
+(        ) S
+(return) K
+( ) p
+(false) k
+(;) p n
+(    }) N
+(    ) N
+(    ) S
+(/*) c n
+(     * purpose: convert the Disk to a human pleasing string) N
+(     * input:   just the disk) N
+(     * output:  the disk's string representation) N
+(     */) N
+(    @Override) p n
+(    ) S
+(public) K
+( String toString\(\) ) p n
+(    {) N
+(        ) S
+(return) K
+( super.toString\(\) + ") p
+(\\nRelease year = ) str
+(" + releaseYear;) p n
+(    }) N
+(}) N
+(Disk.java) (Page 1/1) (Oct 19, 22 19:16) title
+border
+/v 1 store
+/x0 x v get 3.147420 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(/**) C n
+(* This is my code! Its goal is to create an Book object, store its info and impl) N
+(ement useful methods; It extends Item) N
+(* CS 312 - Assignment 4) N
+(* @author Mari Sisco) N
+(* @version Version 1, 10/19/2022) N
+(*/) N
+() p n
+(abstract) K
+( ) p
+(class) K
+( ) p
+(Book) L
+( ) p
+(extends) K
+( Item) p n
+({) N
+(    ) S
+(protected) K
+( String author;) p n
+() N
+(    ) S
+(/*) c n
+(     * purpose: initialize a new book) N
+(     * input:   the book's title, cost, newness flag \(isNew\), and author) N
+(     * output:  the initialized Book) N
+(     */) N
+(    ) p
+(public) K
+( Book\(String title, ) p
+(double) k
+( cost, ) p
+(boolean) k
+( isNew, String author\)) p n
+(    {) N
+(        ) S
+(super) K
+(\(title, cost, isNew\);) p n
+(        this.author = author;) N
+(    }) N
+() N
+(    ) S
+(/*) c n
+(     * purpose: determine if this book has a given auhor) N
+(     * input:   the author, needle) N
+(     * output:  true if needle = author) N
+(     */) N
+(    @Override) p n
+(    ) S
+(public) K
+( ) p
+(boolean) k
+( isMyAuthor\(String needle\)) p n
+(    {) N
+(        ) S
+(return) K
+( author.equals\(needle\);) p n
+(    }) N
+() N
+(     ) S
+(/*) c n
+(     * purpose: convert the Book to a human pleasing string) N
+(     * input:   just the book) N
+(     * output:  the book's string representation) N
+(     */) N
+(    @Override) p n
+(    ) S
+(public) K
+( String toString\(\)) p n
+(    {) N
+(        ) S
+(return) K
+( super.toString\(\) + ") p
+(\\nAuthor = ) str
+(" + author;) p n
+(    }) N
+(}) N
+(Book.java) (Page 1/1) (Oct 19, 22 19:16) title
+border
+grestore
+(Printed by Mari Sisco) rhead
+(Disk.java, Book.java) (2/8) (Wednesday October 19, 2022) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (1,1) 3
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.147420 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(/**) C n
+(* This is my code! Its goal is to create a CD object, store its info and impleme) N
+(nt some useful methods; It extends Disk) N
+(* CS 312 - Assignment 4) N
+(* @author Mari Sisco) N
+(* @version Version 1, 10/19/2022) N
+(*/) N
+() p n
+(public) K
+( ) p
+(class) K
+( ) p
+(CD) L
+( ) p
+(extends) K
+( Disk) p n
+({) N
+(    ) S
+(protected) K
+( String band;) p n
+() N
+(    ) S
+(/*) c n
+(     * purpose: initialize a CD) N
+(     * input:   the CD's title, cost, newness flag \(isNew\), year released, and b) N
+(and) N
+(     * result:  the initialized CD) N
+(     */) N
+(    ) p
+(public) K
+( CD\(String title, ) p
+(double) k
+( cost, ) p
+(boolean) k
+( isNew, ) p
+(int) k
+( releaseYear, String ) p n
+(band\)) N
+(    {) N
+(        ) S
+(super) K
+(\(title, cost, isNew, releaseYear\);) p n
+(        this.band = band;) N
+(    }) N
+() N
+(    ) S
+(/*) c n
+(     * purpose: serialize a CD) N
+(     * input:   only the CD) N
+(     * output:  the appropriate semi-colon representation of the CD) N
+(     */) N
+(    @Override) p n
+(    ) S
+(public) K
+( String serialize\(\)) p n
+(    {) N
+() S 4 T (String state = ") S
+(USED) str
+(";) p n
+() S 4 T () S
+(if) K
+( \(isNew\)) p n
+() S 4 T (  state = ") S
+(NEW) str
+(";) p n
+(        ) S
+(return) K
+( title + ") p
+(;CD;) str
+(" + cost + ") p
+(;) str
+(" + releaseYear + ") p
+(;) str
+(" + band + ") p
+(;) str
+(" + stat) p n
+(e;) N
+(    }) N
+() N
+(    ) S
+(/*) c n
+(     * purpose: generate the string representation of this CD) N
+(     * input:   only the CD) N
+(     * result:  the string representatio =n of the CD) N
+(     */) N
+(    @Override) p n
+(    ) S
+(public) K
+( String toString\(\)) p n
+(    {) N
+(        ) S
+(return) K
+( ") p
+(CD\\n) str
+(" + super.toString\(\) + ") p
+(\\nBand = ) str
+(" + band + ") p
+(\\n) str
+(";) p n
+(    }) N
+(}) N
+(CD.java) (Page 1/1) (Oct 19, 22 19:17) title
+border
+/v 1 store
+/x0 x v get 3.147420 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(/**) C n
+(* This is my code! Its goal is to create a DVD object, store its info and implem) N
+(ent some useful methods; It extends Disk) N
+(* CS 312 - Assignment 4) N
+(* @author Mari Sisco) N
+(* @version Version 1, 10/19/2022) N
+(*/) N
+() p n
+(public) K
+( ) p
+(class) K
+( ) p
+(DVD) L
+( ) p
+(extends) K
+( Disk) p n
+({) N
+(    ) S
+(protected) K
+( String studio;) p n
+(    ) N
+(    ) S
+(/*) c n
+(     * purpose: initialize a DVD) N
+(     * input:   the DVD's title, cost, newness flag \(isNew\), year released, and ) N
+(the studio) N
+(     * result:  the initialized DVD) N
+(     */) N
+(    ) p
+(public) K
+( DVD\(String title, ) p
+(double) k
+( cost, ) p
+(boolean) k
+( isNew, ) p
+(int) k
+( releaseYear, String) p n
+( studio\)) N
+(    {) N
+(        ) S
+(super) K
+(\(title, cost, isNew, releaseYear\);) p n
+(        this.studio = studio;) N
+(    }) N
+() N
+(     ) S
+(/*) c n
+(     * purpose: serialize a DVD) N
+(     * input:   only the DVD) N
+(     * output:  the appropriate semi-colon representation of the DVD) N
+(     */) N
+(    @Override) p n
+(    ) S
+(public) K
+( String serialize\(\)) p n
+(    {) N
+(        String state = ") S
+(USED) str
+(";) p n
+(        ) S
+(if) K
+( \(isNew\)) p n
+(          state = ") S
+(NEW) str
+(";) p n
+(        ) S
+(return) K
+( title + ") p
+(;DVD;) str
+(" + cost + ") p
+(;) str
+(" + releaseYear + ") p
+(;) str
+(" + studio + ") p
+(;) str
+(" + s) p n
+(tate;) N
+(    }) N
+() N
+(    ) S
+(/*) c n
+(     * purpose: generate the string representation of this DVD) N
+(     * input:   only the DVD) N
+(     * result:  the string representation of the DVD) N
+(     */) N
+(    @Override) p n
+(    ) S
+(public) K
+( String toString\(\)) p n
+(    {) N
+(        ) S
+(return) K
+( ") p
+(DVD\\n) str
+(" + super.toString\(\) + ") p
+(\\nStudio = ) str
+(" + studio  + ") p
+(\\n) str
+(";) p n
+(    }) N
+(}) N
+(DVD.java) (Page 1/1) (Oct 19, 22 19:18) title
+border
+grestore
+(Printed by Mari Sisco) rhead
+(CD.java, DVD.java) (3/8) (Wednesday October 19, 2022) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (1,1) 4
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.147420 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(/**) C n
+(* This is my code! Its goal is to create a PrintBook object, store its info and ) N
+(implement some useful methods; It extends Book) N
+(* CS 312 - Assignment 4) N
+(* @author Mari Sisco) N
+(* @version Version 1, 10/19/2022) N
+(*/) N
+(public) K
+( ) p
+(class) K
+( ) p
+(PrintBook) L
+( ) p
+(extends) K
+( Book) p n
+({) N
+(    ) S
+(protected) K
+( String genre;) p n
+() N
+(    ) S
+(/*) c n
+(     * purpose: initialize a print book) N
+(     * input:   the PrinBook's title, cost, newness flag \(isNew\), author and gen) N
+(re) N
+(     * result:  the initialized PrintBook) N
+(     */) N
+(    ) p
+(public) K
+( PrintBook\(String title, ) p
+(double) k
+( cost, ) p
+(boolean) k
+( isNew, String author, St) p n
+(ring genre\)) N
+(    {) N
+(        ) S
+(super) K
+(\(title, cost, isNew, author\);) p n
+(        this.genre = genre;) N
+(    }) N
+(    ) N
+(    ) S
+(/*) c n
+(     * purpose: serialize a PrintBook) N
+(     * input:   only the PrintBook) N
+(     * output:  the appropriate semi-colon representation of the book) N
+(     */) N
+(    @Override) p n
+(    ) S
+(public) K
+( String serialize\(\)) p n
+(    {) N
+(        String state = ") S
+(USED) str
+(";) p n
+(        ) S
+(if) K
+( \(isNew\)) p n
+(          state = ") S
+(NEW) str
+(";) p n
+(        ) S
+(return) K
+( title + ") p
+(;BOOK;) str
+(" + cost + ") p
+(;) str
+(" + author + ") p
+(;) str
+(" + genre + ") p
+(;) str
+(" + state) p n
+(;) N
+(    }) N
+() N
+(    ) S
+(/*) c n
+(     * purpose: generate the string representation of this book) N
+(     * input:   only the book) N
+(     * result:  the string representation of the book) N
+(     */) N
+(    @Override) p n
+(    ) S
+(public) K
+( String toString\(\)) p n
+(    {) N
+(        ) S
+(return) K
+( ") p
+(BOOK\\n) str
+(" + super.toString\(\) + ") p
+(\\nGenre = ) str
+(" + genre + ") p
+(\\n) str
+(";) p n
+(    }) N
+(}) N
+(PrintBook.java) (Page 1/1) (Oct 19, 22 19:19) title
+border
+/v 1 store
+/x0 x v get 3.147420 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(/**) C n
+(* This is my code! Its goal is to create an Item object, AudioBooK and store its) N
+( information) N
+(* CS 312 - Assignment 4) N
+(* @author Mari Sisco) N
+(* @version Version 1, 10/19/2022) N
+(*/) N
+() p n
+(public) K
+( ) p
+(class) K
+( ) p
+(AudioBook) L
+( ) p
+(extends) K
+( Book) p n
+({) N
+(    ) S
+(protected) K
+( String reader;) p n
+(    ) N
+(    ) S
+(/*) c n
+(     * purpose: initialize an audio book) N
+(     * input:   the AudioBook's title, cost, newness flag \(isNew\), author and ge) N
+(nre) N
+(     * result:  the initialized AudioBook) N
+(     */) N
+(    ) p
+(public) K
+( AudioBook\(String title, ) p
+(double) k
+( cost, ) p
+(boolean) k
+( isNew, String author, St) p n
+(ring reader\)) N
+(    {) N
+(        ) S
+(super) K
+(\(title, cost, isNew, author\);) p n
+(        this.reader = reader;) N
+(    }) N
+() N
+(     ) S
+(/*) c n
+(     * purpose: serialize an AudioBook) N
+(     * input:   only the AudioBook) N
+(     * output:  the appropriate semi-colon representation of the AudioBook) N
+(     */) N
+(    @Override) p n
+(    ) S
+(public) K
+( String serialize\(\)) p n
+(    {) N
+(        String state = ") S
+(USED) str
+(";) p n
+(        ) S
+(if) K
+( \(isNew\)) p n
+(          state = ") S
+(NEW) str
+(";) p n
+(        ) S
+(return) K
+( title + ") p
+(;AUDIOBOOK;) str
+(" + cost + ") p
+(;) str
+(" + author + ") p
+(;) str
+(" + reader + ") p
+(;) str
+(" +) p n
+( state;) N
+(    }) N
+() N
+(    ) S
+(/*) c n
+(     * purpose: generate the string representation of this AudioBook) N
+(     * input:   only the audio book) N
+(     * result:  the string representation of the audio book) N
+(     */) N
+(    @Override) p n
+(    ) S
+(public) K
+( String toString\(\)) p n
+(    {) N
+(        ) S
+(return) K
+( ") p
+(AUDIOBOOK\\n) str
+(" + super.toString\(\) + ") p
+(\\nReader = ) str
+(" + reader + ") p
+(\\n) str
+(";) p n
+(    }) N
+(}) N
+() N
+(AudioBook.java) (Page 1/1) (Oct 19, 22 19:20) title
+border
+grestore
+(Printed by Mari Sisco) rhead
+(PrintBook.java, AudioBook.java) (4/8) (Wednesday October 19, 2022) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (1-2) 5
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.147420 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(/**) C n
+(* This is my code! Its goal is to maintain order on Patrick's stuff and define m) N
+(ethods for some tasks \(display, add or remove items\)) N
+(* CS 312 - Assignment 4) N
+(* @author Mari Sisco) N
+(* @version Version 1, 10/19/2022) N
+(*/) N
+() p n
+(import) K
+( java.util.Deque;) p n
+(import) K
+( java.util.ArrayDeque;) p n
+() N
+(public) K
+( ) p
+(class) K
+( ) p
+(Inventory) L n
+({) p n
+(    ) S
+(protected) K
+( Deque <Item> stuff;) p n
+() N
+(    ) S
+(/*) c n
+(     * purpose: initialize an empty inventory) N
+(     * input:   nothing) N
+(     * result:  an empty inventory) N
+(     */) N
+(    ) p
+(public) K
+( Inventory\(\)) p n
+(    {) N
+(        stuff = ) S
+(new) K
+( ArrayDeque<Item>\(\);) p n
+(    }) N
+() N
+(    ) S
+(/*) c n
+(     * purpose: add an item to the inventory) N
+(     * input:   the new item, it) N
+(     * result:  the inventory is updated) N
+(     */) N
+(    ) p
+(public) K
+( ) p
+(void) k
+( add\(Item it\)) p n
+(    {) N
+(        stuff.add\(it\);) N
+(    }) N
+() N
+(    ) S
+(/*) c n
+(     * purpose: serialize the items of the inventory) N
+(     * input:   only the inventory) N
+(     * result:  the serialized \(semicolon separated\) strings with newlines betwe) N
+(en items) N
+(     */) N
+(    ) p
+(public) K
+( String serialize\(\)) p n
+(    {) N
+() S 4 T (String ans = "";) N
+() S 4 T () S
+(for) K
+(\( Item i : stuff\)) p n
+(          ans +=  i.serialize\(\);) N
+(        ) S
+(return) K
+( ans;) p n
+(    }) N
+() N
+(    ) S
+(/*) c n
+(     * purpose: return the sze of the inventory \(used for testing\)) N
+(     * input:   only the inventory) N
+(     * result:  the number of items in the inventory) N
+(     */) N
+(    ) p
+(public) K
+( ) p
+(int) k
+( size\(\)) p n
+(    {) N
+(        ) S
+(return) K
+( stuff.size\(\);) p n
+(    }) N
+() N
+(    ) S
+(/*) c n
+(     * purpose: display items having a given title) N
+(     * input:   the title, needle) N
+(     * result:  String reperesentation of matching items) N
+(     */) N
+(    ) p
+(public) K
+( String displayMatchingTitle\(String needle\)) p n
+(    {) N
+() S 4 T (String display = "";) N
+() S 4 T () S
+(for) K
+( \(Item i : stuff\)) p n
+() S 4 T ({) N
+(Inventory.java) (Page 1/3) (Oct 19, 22 19:20) title
+border
+/v 1 store
+/x0 x v get 3.147420 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+() p 4 T (  ) S
+(if) K
+( \(i.isMyTitle\(needle\)\)) p n
+(            display += ") S
+(\\n) str
+(" + i;) p n
+() S 4 T (}) N
+(        ) S
+(return) K
+( display;) p n
+(    }) N
+() N
+(    ) S
+(/*) c n
+(     * purpose: display items having a given author) N
+(     * input:   the author, needle) N
+(     * result:  string representation of the matchin items) N
+(     */) N
+(    ) p
+(public) K
+( String displayMatchingAuthor\(String needle\)) p n
+(    {) N
+() S 4 T (String display = "";) N
+(        ) S
+(for) K
+( \(Item i : stuff\)) p n
+(        {) N
+(          ) S
+(if) K
+( \(i.isMyAuthor\(needle\)\)) p n
+(            display += ") S
+(\\n) str
+(" + i;) p n
+(        }) N
+(        ) S
+(return) K
+( display;) p n
+(    }) N
+() N
+(    ) S
+(/*) c n
+(     * purpose: display all items) N
+(     * input:   nothing) N
+(     * result:  string representation of all items) N
+(     */) N
+(    ) p
+(public) K
+( String displayAll\(\)) p n
+(    {) N
+() S 4 T (String display = "";) N
+() S 4 T () S
+(if) K
+( \(stuff.size\(\) == 0\)) p n
+() S 4 T (  ) S
+(return) K
+( display;) p n
+() S 4 T () S
+(else) K n
+() p 4 T ({) N
+(          ) S
+(for) K
+( \(Item i : stuff\)) p n
+(          {) N
+(            display += ") S
+(\\n) str
+(" + i.toString\(\);) p n
+(          }) N
+() S 4 T (}) N
+(        ) S
+(return) K
+( display;) p n
+(    }) N
+() N
+(    ) S
+(/*) c n
+(     * purpose: convert the inventory to a human pleasing string) N
+(     * input:   just the inventory) N
+(     * result:  the inventory's string representation) N
+(     * [takes use of displayAll\(\) as it does the same thing]) N
+(     */) N
+(    ) p
+(public) K
+( String toString\(\)) p n
+(    {) N
+(        ) S
+(return) K
+( displayAll\(\);) p n
+(    }) N
+() N
+(    ) S
+(/*) c n
+(     * purpose: remove all items with a given author) N
+(     * input:   the title, needle) N
+(     * result:  the updated inventory) N
+(     */) N
+(    ) p
+(public) K
+( ) p
+(void) k
+( removeMatchingTitle \(String needle\)) p n
+(    {) N
+(       Deque<Item> copyStuff = ) S
+(new) K
+( ArrayDeque<Item>\(stuff\);) p n
+(       ) N
+(       ) S
+(for) K
+( \(Item i : copyStuff\)) p n
+(       {) N
+(          ) S
+(if) K
+( \(i.isMyTitle\(needle\)\)) p n
+(            stuff.remove\(i\);) N
+(       }) N
+(    }) N
+() N
+(Inventory.java) (Page 2/3) (Oct 19, 22 19:20) title
+border
+grestore
+(Printed by Mari Sisco) rhead
+(Inventory.java) (5/8) (Wednesday October 19, 2022) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (3,1) 6
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.147420 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(    ) p
+(/*) c n
+(     * purpose: remove all items with a given author) N
+(     * input:   the author needle) N
+(     * result:  the updated inventory) N
+(     */) N
+(    ) p
+(public) K
+( ) p
+(void) k
+( removeMatchingAuthor \(String needle\)) p n
+(    {) N
+(       Deque<Item> copyStuff = ) S
+(new) K
+( ArrayDeque<Item>\(stuff\);) p n
+(       ) N
+(       ) S
+(for) K
+( \(Item i : copyStuff\)) p n
+(       {) N
+(          ) S
+(if) K
+( \(i.isMyAuthor\(needle\)\)) p n
+(            stuff.remove\(i\);) N
+(       }) N
+(    }) N
+(}) N
+(Inventory.java) (Page 3/3) (Oct 19, 22 19:20) title
+border
+/v 1 store
+/x0 x v get 3.147420 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(/**) C n
+(  * This is my code!  Its goal is to create a program to maintain inventory for ) N
+(  * Patrick's New and Used Stuff Store) N
+(  * CS 312 - Assignment 4) N
+(  * @author Mari Sisco appending onto Dr.Binkley's code) N
+(  * @version 1.0, 10/19/2022) N
+(  */) N
+() p n
+(/**) C n
+(  * This is my code!  Its goal is to provide a command-line interface) N
+(  * CS 312 - Assignment 4) N
+(  * @author Dave Binkley) N
+(  * @version 1.0 10/10/22) N
+(  */) N
+() p n
+() N
+(public) K
+( ) p
+(class) K
+( ) p
+(CLI) L
+(     ) p
+(// the command line interface!) c n
+({) p n
+(  ) S
+(/*) c n
+(   * purpose: run the program) N
+(   * input:   command from the user \(taken from the command line\)) N
+(   * result:  the database of stuff read from stdin is updated and) N
+(              written to stdout) N
+(   */) N
+(  ) p
+(public) K
+( ) p
+(static) K
+( ) p
+(void) k
+( main\(String [] args\)) p n
+(  {) N
+(    CLI cli = ) S
+(new) K
+( CLI\(\);) p n
+(    ItemFactory factory = ) S
+(new) K
+( ItemFactory\(\);) p n
+(    Inventory inv = factory.readDatabase\(System.in\);) N
+(    cli.processCommand\(args, inv, factory\);) N
+(  }) N
+() N
+() N
+(  ) S
+(/*) c n
+(   * purpose: print an error message and the program's command line options) N
+(   * input:   an error message) N
+(   * result:  message and instructions printed to stdout) N
+(   */) N
+(  ) p
+(private) K
+( ) p
+(void) k
+( usage\(String msg\)) p n
+(  {) N
+(    System.err.println\(") S
+(\\n) str
+(" + msg + ") p
+(\\nUsage: java CLI [-d|-a|-s] <options>\\n) str
+(") p n
+(     + ") S
+(there are three command line options\\n) str
+(") p n
+(     + ") S
+(  \(display\) -d [\(everything by default\) | -t title | -a author ]\\n) str
+(") p n
+(     + ") S
+(  \(add\)     -a DVD         \\"title\\" cost year   \\"studio\\" NEW|USED\\n) str
+(") p n
+(     + ") S
+(  \(add\)     -a CD          \\"title\\" cost year   \\"band\\"   NEW|USED\\n) str
+(") p n
+(     + ") S
+(  \(add\)     -a BOOK        \\"title\\" cost author  genre     NEW|USED\\n) str
+(") p n
+(     + ") S
+(  \(add\)     -a AUDIOBOOK   \\"title\\" cost author \\"reader\\" NEW|USED\\n) str
+(") p n
+(     + ") S
+(  \(sell\)    -s [-t title | -a author]) str
+("\);) p n
+(  }) N
+() N
+(  ) S
+(/*) c n
+(   * purpose: process the user's command) N
+(   * input:   the command arguments and the current inventory) N
+(   * result:  display requested information or inventory, inv as updated, ) N
+(   *          is written to stdout) N
+(   */) N
+(  ) p
+(private) K
+( ) p
+(void) k
+( processCommand\(String [] args, Inventory inv, ItemFactory factory) p n
+(\)) N
+(  {) N
+(    ) S
+(if) K
+( \(args.length == 0\)) p n
+(    {) N
+(      usage\(""\);) N
+(      ) S
+(return) K
+(;) p n
+(    }) N
+(    ) S
+(if) K
+( \(") p
+(-d) str
+(".equals\(args[0]\)\)) p n
+(    {) N
+(      ) S
+(if) K
+( \(args.length == 1\)) p n
+(      {) N
+(        System.out.println\(inv.displayAll\(\)\);) N
+(CLI.java) (Page 1/2) (Oct 19, 22 19:21) title
+border
+grestore
+(Printed by Mari Sisco) rhead
+(Inventory.java, CLI.java) (6/8) (Wednesday October 19, 2022) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (2,1) 7
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.147420 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(      }) p n
+(      ) S
+(else) K
+( ) p
+(if) K
+( \(") p
+(-t) str
+(".equals\(args[1]\) && args.length == 3\) ) p n
+(      {) N
+(        System.out.println\(inv.displayMatchingTitle\(args[2].toString\(\)\)\);) N
+(      }) N
+(      ) S
+(else) K
+( ) p
+(if) K
+( \(") p
+(-a) str
+(".equals\(args[1]\) && args.length == 3\)) p n
+(      {) N
+(        System.out.println\(inv.displayMatchingAuthor\(args[2].toString\(\)\)\);) N
+(      }) N
+(      ) S
+(else) K n
+(        usage\(") p
+(Invalid display command) str
+("\);) p n
+(    }) N
+(    ) S
+(else) K
+( ) p
+(if) K
+( \(") p
+(-a) str
+(".equals\(args[0]\)\)) p n
+(    {) N
+(      inv.add\(factory.createItem\(args[1], args[2], Double.parseDouble\(args[3]\), ) N
+(args[4], args[5], Boolean.parseBoolean\(args[6]\)\)\);) N
+(      System.out.println\(inv.serialize\(\)\);) N
+(    }) N
+(    ) S
+(else) K
+( ) p
+(if) K
+(\(") p
+(-s) str
+(".equals\(args[0]\)\)) p n
+(    {) N
+(      ) S
+(if) K
+( \(") p
+(-t) str
+(".equals\(args[1]\) && args.length == 3\)) p n
+(      {) N
+(        inv.removeMatchingTitle\(args[2]\);) N
+(        System.out.println\(inv.displayAll\(\)\);) N
+(      }) N
+(      ) S
+(else) K
+( ) p
+(if) K
+( \(") p
+(-a) str
+(".equals\(args[1]\) && args.length == 3\)) p n
+(      {) N
+() S 4 T (inv.removeMatchingAuthor\(args[2]\);) N
+(        System.out.println\(inv.displayAll\(\)\);) N
+(      }) N
+(      ) S
+(else) K n
+() p 4 T (usage\(") S
+(Invalid sell command) str
+("\);) p n
+(    }) N
+(    ) S
+(else) K n
+(    {) p n
+(      usage\(") S
+(Bummer I don't know how to `) str
+(" + args[0] + ") p
+(') str
+("\);) p n
+(    }) N
+(  }) N
+(}) N
+(CLI.java) (Page 2/2) (Oct 19, 22 19:21) title
+border
+/v 1 store
+/x0 x v get 3.147420 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(/**) C n
+(  * This is my code!  Its goal is to create a program to maintain inventory for ) N
+(  * Patrick's New and Used Stuff Store) N
+(  * CS 312 - Assignment 4) N
+(  * @author Mari Sisco appending onto Dr.Binkley's code) N
+(  * @version 1.0, 10/19/2022) N
+(  */) N
+() p n
+(/**) C n
+(  * This is my code!  Its goal is to create items) N
+(  * CS 312 - Assignment 4) N
+(  * @author Dave Binkley) N
+(  * @version 1.0 10/10/22 ) N
+(  */) N
+() p n
+() N
+(import) K
+( java.io.BufferedReader;) p n
+(import) K
+( java.io.FileReader;) p n
+(import) K
+( java.io.InputStreamReader;) p n
+(import) K
+( java.io.InputStream;) p n
+(import) K
+( java.util.StringTokenizer;) p n
+() N
+(public) K
+( ) p
+(class) K
+( ) p
+(ItemFactory) L
+(     ) p
+(// the maker of Items) c n
+({) p n
+(  ) S
+(public) K
+( ) p
+(final) K
+( ) p
+(static) K
+( ) p
+(int) k
+( CURRENT_YEAR = 2022;  ) p n
+(  ) S
+(public) K
+( ) p
+(final) K
+( ) p
+(static) K
+( ) p
+(int) k
+( EXPECTED_ARGS = 6;) p n
+() N
+() N
+(  ) S
+(// [ an example of the *factory* pattern ]) c n
+(  ) p
+(/*) c n
+(   * purpose: create a new item based on the mediaKind) N
+(   * input:   the new items data) N
+(   * result:  a new Item of the appropriate subclass) N
+(   */) N
+(  ) p
+(public) K
+( Item createItem\(String title, String mediaKind, Double cost, ) p n
+(                         String authorOrYear, String property2, Boolean isNew\)) N
+(  {) N
+(    Item it = ) S
+(null) k
+(;) p n
+(    ) S
+(int) k
+( year = CURRENT_YEAR;) p n
+(    ) S
+(int) k
+( released = -1;) p n
+() N
+(    ) S
+(switch) K
+( \(mediaKind\) ) p n
+(    {) N
+(      ) S
+(case) K
+(") p
+(AUDIOBOOK) str
+(":       ) p n
+(        it = ) S
+(new) K
+( AudioBook\(title, cost, isNew, authorOrYear, property2\);) p n
+(        ) S
+(break) K
+(;) p n
+(      ) N
+(      ) S
+(case) K
+( ") p
+(DVD) str
+(":) p n
+() S 4 T (released = Integer.parseInt\(authorOrYear\);) N
+() S 4 T () S
+(if) K
+( \(released > year\)) p n
+() S 4 T ({) N
+(          it = ) S
+(new) K
+( DVD\(title, cost, isNew, year, property2\);) p n
+() S 4 T (}) N
+(        ) S
+(else) K n
+() p 4 T (  it = ) S
+(new) K
+( DVD\(title, cost, isNew, released, property2\);) p n
+(        ) S
+(break) K
+(;) p n
+(      ) N
+(      ) S
+(case) K
+( ") p
+(BOOK) str
+(":) p n
+( ) S 4 T () S
+(if) K
+( \(!property2.equals\(") p
+(SCIFI) str
+("\)\)) p n
+() S 4 T (  property2 = ") S
+(OTHER) str
+(";) p 28 T () N
+(      ) S 8 T (it = ) S
+(new) K
+( PrintBook\(title, cost, isNew, authorOrYear, property2\);) p n
+(        ) S
+(break) K
+(;) p n
+(      ) N
+(      ) S
+(case) K
+( ") p
+(CD) str
+(":) p n
+() S 4 T (released = Integer.parseInt\(authorOrYear\);) N
+(        ) S
+(if) K
+( \(released > year\)) p n
+(        {) N
+(          it = ) S
+(new) K
+( CD\(title, cost, isNew, year, property2\);) p n
+(        }) N
+(ItemFactory.java) (Page 1/3) (Oct 19, 22 19:21) title
+border
+grestore
+(Printed by Mari Sisco) rhead
+(CLI.java, ItemFactory.java) (7/8) (Wednesday October 19, 2022) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (2-3) 8
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.147420 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(        ) p
+(else) K n
+(          it = ) p
+(new) K
+( CD\(title, cost, isNew, released, property2\);) p n
+(        ) S
+(break) K
+(;) p n
+() N
+(      ) S
+(default) K
+(:) p n
+(        System.err.println\(") S
+(I'll pretend i didn't see the media kind ) str
+(" ) p n
+(                           + mediaKind\);) N
+(    }) N
+() N
+(    ) S
+(return) K
+( it;  ) p n
+(  }) N
+() N
+(  ) S
+(/*) c n
+(   * purpose: create a new Item based on a database record \(line from the file\)) N
+(   * input:   a semicolon separated string) N
+(   * result:  a new Item of the appropriate subclass) N
+(   */) N
+(  ) p
+(private) K
+( Item parseItemString\(String s\)) p n
+(  {) N
+(    StringTokenizer tok = ) S
+(new) K
+( StringTokenizer\(s, ") p
+(;) str
+("\);) p n
+(    ) S
+(if) K
+( \(tok.countTokens\(\) != EXPECTED_ARGS\)   ) p
+(// [ some defensive programming ]) c n
+(      ) p
+(return) K
+( ) p
+(null) k
+(;  ) p
+(// hey I was promised that the input was valid!) c n
+(    ) p
+(else) K n
+(    {) p n
+(      String [] arr = ) S
+(new) K
+( String [6];) p n
+(      ) S
+(for) K
+(\() p
+(int) k
+( i = 0; tok.hasMoreTokens\(\); i++\)) p n
+(      {) N
+() S 4 T (      arr[i] = tok.nextToken\(\);) N
+(      }) N
+(    ) S
+(return) K
+( createItem\(arr[0], arr[1], Double.parseDouble\(arr[2]\), arr[3], arr[4]) p n
+(, Boolean.parseBoolean\(arr[5]\)\);) N
+(    }) N
+(  }) N
+() N
+(  ) S
+(/*) c n
+(   * purpose: read the inventory from a Java reader) N
+(   * input:   the reader) N
+(   * result:  a populated inventory) N
+(   */) N
+(  ) p
+(public) K
+( Inventory readDatabase\(BufferedReader reader\)) p n
+(  {) N
+(    Inventory inv = ) S
+(new) K
+( Inventory\(\);) p n
+(    ) S
+(try) K n
+(    {) p n
+(      String line;) N
+() N
+(      ) S
+(for) K
+(\(line = reader.readLine\(\); line != ) p
+(null) k
+(; line = reader.readLine\(\)\)) p n
+(      {) N
+(        ) S
+(if) K
+( \(line.length\(\) == 0\)) p n
+(          ) S
+(continue) K
+(;   ) p
+(// ignore blank lines) c n
+() p n
+(        Item it = parseItemString\(line\);) N
+(        ) S
+(if) K
+( \(it == ) p
+(null) k
+(\) ) p n
+(          System.err.println\(") S
+(Someone needs to take a look at this! ) str
+(" + line\);) p n
+(        ) S
+(else) K n
+(          inv.add\(it\);) p n
+(      }) N
+(    }) N
+(    ) S
+(catch) K
+( \(Exception E\)) p n
+(    {) N
+(      System.err.println\(") S
+(ah sorry but ) str
+(" + E\);) p n
+(    }) N
+() N
+(    ) S
+(return) K
+( inv;) p n
+(  }) N
+() N
+(  ) S
+(// [ an example of the *wrapper* pattern ]) c n
+(  ) p
+(/* [ overload the readDatabase method ] ) c n
+(   *) N
+(ItemFactory.java) (Page 2/3) (Oct 19, 22 19:21) title
+border
+/v 1 store
+/x0 x v get 3.147420 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(   * purpose: read the inventory from an input stream) c n
+(   * input:   the stream, in \(e.g., stdin\)) N
+(   * result:  returns the populated inventory) N
+(   */) N
+( ) p n
+(  ) S
+(public) K
+( Inventory readDatabase\(InputStream in\) ) p n
+(  {) N
+(    ) S
+(return) K
+( readDatabase\() p
+(new) K
+( BufferedReader\() p
+(new) K
+( InputStreamReader\(in\)\)\);) p n
+(  }) N
+() N
+() N
+(  ) S
+(// [ another example of the *wrapper* pattern ]) c n
+(  ) p
+(/* [ overload the readDatabase method ] ) c n
+(   *) N
+(   * purpose: read the inventory from a disk file) N
+(   * input:   the file name, fileName) N
+(   * result:  returns the populated inventory) N
+(   */) N
+(  ) p
+(public) K
+( Inventory readDatabase\(String fileName\) ) p n
+(  {) N
+(    ) S
+(try) K n
+(    {) p n
+(      ) S
+(return) K
+( readDatabase\() p
+(new) K
+( BufferedReader\() p
+(new) K
+( FileReader\(fileName\)\)\);) p n
+(    }) N
+(    ) S
+(catch) K
+( \(Exception E\)) p n
+(    {) N
+(      System.err.println\(") S
+(ah sorry but ) str
+(" + E\);) p n
+(      ) S
+(return) K
+( ) p
+(null) k
+(;) p n
+(    }) N
+(  }) N
+(}) N
+(ItemFactory.java) (Page 3/3) (Oct 19, 22 19:21) title
+border
+grestore
+(Printed by Mari Sisco) rhead
+(ItemFactory.java) (8/8) (Wednesday October 19, 2022) footer
+end % of iso1dict
+pagesave restore
+showpage
+
+%%Trailer
+end
+%%EOF
