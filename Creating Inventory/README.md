@@ -1,6 +1,8 @@
 # CS 312 Assignment 3
 # Creating Inventory
 
+Main Method in CLI.java
+
 # OOA1
 ### Finding Classes and Objects
 
